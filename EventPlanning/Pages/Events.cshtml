@@ -1,0 +1,133 @@
+﻿@page
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model EventPlanning.Pages.EventsModel
+
+@{
+    ViewData["Title"] = "Events";
+}
+
+<h1>Events</h1>
+@if (Model.IsAdmin)
+{
+	<div class="row">
+		<div class="col-md-8">
+			<form asp-page-handler="AddEvent" method="post">
+				<h4>Create a new event.</h4>
+				<hr />
+				<div asp-validation-summary="All" class="text-danger"></div>
+				<div class="form-group">
+					<label asp-for="Input.EventName"></label>
+					<input asp-for="Input.EventName" class="form-control" />
+					<span asp-validation-for="Input.EventName" class="text-danger"></span>
+				</div>
+				<div class="form-group">
+					<label asp-for="Input.EventDate"></label>
+					<input asp-for="Input.EventDate" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" />
+					<span asp-validation-for="Input.EventDate" class="text-danger"></span>
+				</div>
+				<div class="form-group">
+					<label asp-for="Input.MaxPersons"></label>
+					<input asp-for="Input.MaxPersons" class="form-control" />
+					<span asp-validation-for="Input.MaxPersons" class="text-danger"></span>
+				</div>
+				@for (var i = 0; i< Model.Details.Count; i++)
+				{
+					<table>
+						<tr>
+							<td>
+								<div class="form-group">
+									<label asp-for="Details[i].Name"></label>
+									<input asp-for="Details[i].Name" class="form-control" />
+									<span asp-validation-for="Details[i].Name" class="text-danger"></span>
+								</div>
+							</td>
+							<td>
+								<div class="form-group">
+									<label asp-for="Details[i].Description"></label>
+									<input asp-for="Details[i].Description" class="form-control" />
+								</div>
+							</td>
+						</tr>
+					</table>
+				}
+				<input type="submit" class="btn btn-primary" name="description" value="Add description"/>
+				<input type="submit" class="btn btn-primary" name="deletedescription" value="Delete description"/>
+				<input type="submit" class="btn btn-primary" name="addevent" value="Add event"/>
+			</form>
+		</div>
+	</div>
+}
+<table class="table">
+	<thead>
+	<tr>
+		<th>
+			@Html.DisplayNameFor(model => model.InputEvent.EventName)
+		</th>
+		<th>
+			@Html.DisplayNameFor(model => model.InputEvent.EventDate)
+		</th>
+		<th>
+			@Html.DisplayNameFor(model => model.InputEvent.MaxPersons)
+		</th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+	@foreach (var item in Model.EventModel) {
+		<tr class="table-primary">
+			<td>
+				@Html.DisplayFor(modelItem => item.EventName)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.EventDate)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.MaxPersons)
+			</td>
+			<td>
+				@if (item.EventDate < DateTime.Now)
+				{
+					<button class="btn btn-primary" disabled>Expired</button>
+				}
+				else
+				{
+					@if (item.RegisteredUsers.Count < item.MaxPersons || item.RegisteredUsers.Any(r => r.RegisteredUserName == User.Identity.Name))
+					{
+						@if (item.RegisteredUsers.All(r => r.RegisteredUserName != User.Identity.Name))
+						{
+							<form asp-page-handler="SignUp" method="post">
+								<button class="btn btn-primary">Sign up</button>
+								<input style="display: none" name="eventModelId" value="@item.EventModelId"/>
+							</form>
+						}
+						else
+						{
+							<form asp-page-handler="SignOut" method="post">
+								<button class="btn btn-danger">Sign out</button>
+								<input style="display: none" name="eventModelId" value="@item.EventModelId"/>
+							</form>
+						}
+					}
+					else
+					{
+						<button class="btn btn-primary" disabled>Maximum</button>
+					}
+				}
+			</td>
+		</tr>
+		@foreach (var detail in item.EventDetails)
+		{
+			<tr class="table-secondary">
+				<td>
+					@Html.DisplayFor(modelDetail => detail.Name)
+				</td>
+				<td>
+					@Html.DisplayFor(modelDetail => detail.Description)
+				</td>
+				<td></td>
+				<td></td>
+			</tr>
+		}
+	}
+	</tbody>
+</table>
