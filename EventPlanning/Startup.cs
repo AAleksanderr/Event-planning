@@ -39,7 +39,7 @@ namespace EventPlanning
             services.AddRazorPages();
         }
         
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationDbContext db)
         {
             if (env.IsDevelopment())
             {
@@ -51,6 +51,8 @@ namespace EventPlanning
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
+
+            db.Database.EnsureCreated();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
